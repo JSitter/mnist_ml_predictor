@@ -7,15 +7,26 @@ from werkzeug.datastructures import FileStorage
 from PIL import Image
 from keras.models import model_from_json
 import tensorflow as tf
-
+import os
+# from flask_pymongo import PyMongo
+import datetime
+from pymongo import MongoClient
+import json
 
 app = Flask(__name__)
+
+client = MongoClient('mongodb://mongodb:27017/mnist')
+mnist_db = client.mnist
+coll = mnist_db['interaction']
+
 api = Api(app, version='1.0', title='MNIST Classification', description='CNN for Mnist')
 ns = api.namespace('Make_School', description='Methods')
 
 single_parser = api.parser()
 single_parser.add_argument('file', location='files',
                            type=FileStorage, required=True)
+
+db_parser = api.parser()
 
 model = load_model('my_model.h5')
 graph = tf.get_default_graph()
@@ -26,6 +37,8 @@ class CNNPrediction(Resource):
     """Uploads your data to the CNN"""
     @api.doc(parser=single_parser, description='Upload an mnist image')
     def post(self):
+        print('halp!!')
+        
         args = single_parser.parse_args()
         image_file = args.file
         image_file.save('image.png')
@@ -43,9 +56,29 @@ class CNNPrediction(Resource):
         print(out[0])
         print(np.argmax(out[0]))
         r = np.argmax(out[0])
-
+        print("datetime", datetime.datetime.utcnow())
+        print("prediction", str(r))
+        record_obj = {'prediction':str(r), 'time':datetime.datetime.utcnow(), 'filename':'image.png'}
+        print('Record Object')
+        print(record_obj)
+        # doc = mnist_db.interaction.insert(record_obj)
+        my_id = coll.insert_one(record_obj).inserted_id
+        print(my_id)
+        # print("docy mocky", doc)
         return {'prediction': str(r)}
 
+@ns.route('/db_dump')
+class dump_it(Resource):
+    '''Dump all database data for anyone to explore and hack'''
+    @api.doc(parser=db_parser, description='Testing this shit')
+    def get(self):
+        print("getting it")
+        ladada = 'tom'
+        for x in mnist_db.find():
+            print(x)
+            ladada += x
+        return ladada
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    port = int(os.environ.get('PORT', 8000))
+    app.run(host='0.0.0.0', port=port)
