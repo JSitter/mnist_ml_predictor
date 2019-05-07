@@ -65,7 +65,7 @@ class CNNPrediction(Resource):
         my_id = coll.insert_one(record_obj).inserted_id
         print(my_id)
         # print("docy mocky", doc)
-        return {'prediction': str(r)}
+        return {'prediction': str(r), 'db_id': str(my_id)}
 
 @ns.route('/db_dump')
 class dump_it(Resource):
