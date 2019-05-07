@@ -4,6 +4,7 @@ This model demonstrates the deployment of a python app using docker.
 To build the docker container run 
 
 ```
+$ docker-compose build
 $ docker-compose up
 ```
 
