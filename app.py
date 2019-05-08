@@ -76,7 +76,6 @@ class dump_it(Resource):
         ladada = ''
         
         for x in coll.find():
-            print("x is", str(x))
             ladada += str(x)
         return ladada
 
