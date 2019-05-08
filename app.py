@@ -73,10 +73,11 @@ class dump_it(Resource):
     @api.doc(parser=db_parser, description='Testing this shit')
     def get(self):
         print("getting it")
-        ladada = 'tom'
-        for x in mnist_db.find():
-            print(x)
-            ladada += x
+        ladada = ''
+        
+        for x in coll.find():
+            print("x is", str(x))
+            ladada += str(x)
         return ladada
 
 if __name__ == '__main__':
